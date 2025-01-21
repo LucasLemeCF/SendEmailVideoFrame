@@ -32,7 +32,7 @@ def process_message(message):
     if status == "sucesso":
         url_download =body_message['url_download']
         print("URL Download:", url_download)
-        send_email(destinatario, url_download)
+        send_email_success(destinatario, url_download)
     else:
         send_email_error(destinatario)
 
@@ -41,7 +41,7 @@ def process_message(message):
         'body': json.dumps('Hello from Lambda!')
     }
 
-def send_email(destinatario, url_download):
+def send_email_success(destinatario, url_download):
     headers = {
         "api-key": email_api_key,
         "Content-Type": "application/json"
