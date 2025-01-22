@@ -30,16 +30,13 @@ def process_message(message):
     print("Destinatário:", destinatario)
 
     if status == "sucesso":
-        url_download =body_message['url_download']
+        url_download = body_message['url_download']
         print("URL Download:", url_download)
-        send_email_success(destinatario, url_download)
+        response = send_email_success(destinatario, url_download)
     else:
-        send_email_error(destinatario)
+        response = send_email_error(destinatario)
 
-    return {
-        'statusCode': 200,
-        'body': json.dumps('Hello from Lambda!')
-    }
+    return response
 
 def send_email_success(destinatario, url_download):
     headers = {
@@ -58,13 +55,21 @@ def send_email_success(destinatario, url_download):
         response = requests.post(url_smtp, headers=headers, json=data)
 
         if response.status_code in [202, 201]:
-            print("✅ E-mail enviado com sucesso!")
+            return {
+                'statusCode': response.status_code,
+                'body': json.dumps('E-mail enviado com sucesso!')
+            }
         else:
-            print(f"❌ Erro ao enviar o e-mail: {response.status_code}")
-            print(response.text)
+            return {
+                'statusCode': response.status_code,
+                'body': json.dumps(f'Erro ao enviar o e-mail: {response.status_code}')
+            }
 
     except Exception as e:
-        print("❌ Erro na requisição:", str(e))
+        return {
+            'statusCode': "500",
+            'body': json.dumps(f"Erro na requisição: {str(e)}")
+        }
 
 def send_email_error(destinatario):
     headers = {
@@ -82,11 +87,19 @@ def send_email_error(destinatario):
     try:
         response = requests.post(url_smtp, headers=headers, json=data)
 
-        if response.status_code in [202, 201]:
-            print("✅ E-mail de erro enviado.")
+        if response.status_code in [200, 201, 202]:
+            return {
+                'statusCode': response.status_code,
+                'body': json.dumps('E-mail de erro enviado.')
+            }
         else:
-            print(f"❌ Erro ao enviar o e-mail de erro: {response.status_code}")
-            print(response.text)
+            return {
+                'statusCode': response.status_code,
+                'body': json.dumps(f"Erro ao enviar o e-mail de erro: {response.status_code}")
+            }
 
     except Exception as e:
-        print("❌ Erro na requisição:", str(e))
+        return {
+            'statusCode': "500",
+            'body': json.dumps(f"Erro na requisição: {str(e)}")
+        }
